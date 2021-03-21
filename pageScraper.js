@@ -1,5 +1,11 @@
 const CREDENTIALS = require('./credentials');
 
+function machWas(activities) {
+    console.log(CREDENTIALS.username);
+    activities = activities.map(el => el.querySelector('.entry-athlete').textContent);
+    return activities;
+}
+
 const scraperObject = {
     
     url: 'https://www.strava.com/clubs/812233/recent_activity',
@@ -13,7 +19,6 @@ const scraperObject = {
         await page.waitForSelector('.btn-accept-cookie-banner');
         await page.click('.btn-accept-cookie-banner');
 
-
         await page.waitForSelector('#email');
         await page.type('#email', CREDENTIALS.username);
         await page.type('#password', CREDENTIALS.password);
@@ -21,25 +26,13 @@ const scraperObject = {
 
         await page.waitForSelector('.branding-content');
         
-        for (let j = 0; j < 5; j++) {
+        for (let j = 0; j < 2; j++) {   // unbedingt wieder auf 5 umbiegen!!!!!!
+            
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
         }
 
-        let feed = await page.$$eval('.feed-container .activity', activities => {
-            
-            // Extract the links from the data
-            //const map1 = array1.map(x => [x * 2, x]);
-            //activities = activities.map(el => el.querySelector('a').href)
-            //activities = activities.map(el => el.querySelector('.timestamp').getAttribute("datetime"));
-            //activities = activities.map(el => el.querySelector('.entry-athlete').textContent);
-            //activities = activities.map(el => el.querySelector('li[title]').textContent);
-            try {
-              activities = activities.map(el => { if(el.querySelector('li[title="Distanz"]')!=null) {return (el.querySelector('li[title="Distanz"]').textContent)} else { return '0 km';} });
-            } catch(err) {}
-
-            return activities;
-        });
+        let feed = await page.$$eval('.feed-container .activity', machWas);
 
         console.log(feed);
     }
