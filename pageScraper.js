@@ -1,6 +1,7 @@
 const CREDENTIALS = require('./credentials');
 
 const scraperObject = {
+    
     url: 'https://www.strava.com/clubs/812233/recent_activity',
     
     async scraper(browser){
