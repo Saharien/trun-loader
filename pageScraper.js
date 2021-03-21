@@ -21,7 +21,7 @@ const scraperObject = {
 
         await page.waitForSelector('.branding-content');
         
-        for (let j = 0; j < 5; j++) {                          // TODO Unbedingt wieder auf 5 erhöhen!!!!!!!!!!!!!
+        for (let j = 0; j < 5; j++) {
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
         }
