@@ -27,6 +27,7 @@ const scraperObject = {
         }
 
         let feed = await page.$$eval('.feed-container .activity', activities => {
+            
             // Extract the links from the data
             //const map1 = array1.map(x => [x * 2, x]);
             //activities = activities.map(el => el.querySelector('a').href)
