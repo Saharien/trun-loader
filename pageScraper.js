@@ -1,16 +1,17 @@
 const CREDENTIALS = require('./credentials');
 
+
 function machWas(activities) {
-    console.log(CREDENTIALS.username);
-    activities = activities.map(el => el.querySelector('.entry-athlete').textContent);
+    console.log('Oben :' + typeof activities);
+    activities = activities.map(el => { if(el.querySelector('li[title="Distanz"]')!=null) {return (el.querySelector('li[title="Distanz"]').textContent)} else { return '0 km';} });
     return activities;
 }
 
 const scraperObject = {
-    
+
     url: 'https://www.strava.com/clubs/812233/recent_activity',
-    
-    async scraper(browser){
+
+    async scraper(browser) {
         let page = await browser.newPage();
         console.log(`Navigating to ${this.url}...`);
         await page.goto(this.url);
@@ -25,17 +26,36 @@ const scraperObject = {
         await page.click('#login-button');
 
         await page.waitForSelector('.branding-content');
-        
+
         for (let j = 0; j < 2; j++) {   // unbedingt wieder auf 5 umbiegen!!!!!!
-            
+
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
         }
 
-        let feed = await page.$$eval('.feed-container .activity', machWas);
+        let feed = await page.$$eval('.feed-container .activity', activities => {
+            
+            // Extract the links from the data
+            //const map1 = array1.map(x => [x * 2, x]);
+            //activities = activities.map(el => el.querySelector('a').href)
+            //activities = activities.map(el => el.querySelector('.timestamp').getAttribute("datetime"));
+            //activities = activities.map(el => [el.querySelector('.entry-athlete').textContent ]);      !!!!!!!!!
+            //activities = activities.map(el => el.querySelector('li[title]').textContent);
+            // try {
+            //   activities = activities.map(el => { if(el.querySelector('li[title="Distanz"]')!=null) {return (el.querySelector('li[title="Distanz"]').textContent)} else { return '0 km';} });
+            // } catch(err) {}
 
+            activities = activities.map(el => [
+                el.querySelector('a').href,
+                el.querySelector('.entry-athlete').textContent,
+                el.querySelector('.timestamp').getAttribute("datetime"),
+                el.querySelector('li[title="Distanz"]').textContent ] );
+
+            return activities;
+        });
+        
         console.log(feed);
+
     }
 }
-
 module.exports = scraperObject;
