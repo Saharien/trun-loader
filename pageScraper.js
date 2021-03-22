@@ -45,11 +45,24 @@ const scraperObject = {
             //   activities = activities.map(el => { if(el.querySelector('li[title="Distanz"]')!=null) {return (el.querySelector('li[title="Distanz"]').textContent)} else { return '0 km';} });
             // } catch(err) {}
 
-            activities = activities.map(el => [
-                el.querySelector('a').href,
-                el.querySelector('.entry-athlete').textContent,
-                el.querySelector('.timestamp').getAttribute("datetime"),
-                el.querySelector('li[title="Distanz"]').textContent ] );
+            function extractData(el) {
+              
+                var distance = '0 km';
+                try {
+                  if( el.querySelector('li[title="Distanz"]')!=null ) distance = el.querySelector('li[title="Distanz"]').textContent;
+                } catch(err) {}
+                                
+                var line = {
+                    'url'  : el.querySelector('a').href,
+                    'name': el.querySelector('.entry-athlete').textContent,
+                    'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
+                    'distance': distance
+                };
+              
+                return line;
+            }
+
+            activities = activities.map(extractData);            
 
             return activities;
         });
