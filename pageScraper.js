@@ -38,8 +38,8 @@ const scraperObject = {
                                 
                 var line = {
                     'url'  : el.querySelector('a').href,
-                    'name': el.querySelector('.entry-athlete').textContent,
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
+                    'name': el.querySelector('.entry-athlete').textContent,
                     'distance': distance
                 };
               
@@ -53,7 +53,7 @@ const scraperObject = {
         
         feed = feed.map(convertData.convertData);
 
-        
+
         
         console.log(feed);
 
