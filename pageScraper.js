@@ -1,9 +1,5 @@
 const CREDENTIALS = require('./credentials');
-
-function cleanData(activity) {
-    // ToDo Daten säubern
-    return activity;
-}
+const convertData = require('./convertData');
 
 const scraperObject = {
 
@@ -55,7 +51,9 @@ const scraperObject = {
             return activities;
         });
         
-        feed = feed.map(cleanData);
+        feed = feed.map(convertData.convertData);
+
+        
         
         console.log(feed);
 
