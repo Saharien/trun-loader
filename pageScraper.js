@@ -1,10 +1,8 @@
 const CREDENTIALS = require('./credentials');
 
-
-function machWas(activities) {
-    console.log('Oben :' + typeof activities);
-    activities = activities.map(el => { if(el.querySelector('li[title="Distanz"]')!=null) {return (el.querySelector('li[title="Distanz"]').textContent)} else { return '0 km';} });
-    return activities;
+function cleanData(activity) {
+    // ToDo Daten säubern
+    return activity;
 }
 
 const scraperObject = {
@@ -35,16 +33,6 @@ const scraperObject = {
 
         let feed = await page.$$eval('.feed-container .activity', activities => {
             
-            // Extract the links from the data
-            //const map1 = array1.map(x => [x * 2, x]);
-            //activities = activities.map(el => el.querySelector('a').href)
-            //activities = activities.map(el => el.querySelector('.timestamp').getAttribute("datetime"));
-            //activities = activities.map(el => [el.querySelector('.entry-athlete').textContent ]);      !!!!!!!!!
-            //activities = activities.map(el => el.querySelector('li[title]').textContent);
-            // try {
-            //   activities = activities.map(el => { if(el.querySelector('li[title="Distanz"]')!=null) {return (el.querySelector('li[title="Distanz"]').textContent)} else { return '0 km';} });
-            // } catch(err) {}
-
             function extractData(el) {
               
                 var distance = '0 km';
@@ -62,10 +50,12 @@ const scraperObject = {
                 return line;
             }
 
-            activities = activities.map(extractData);            
-
+            activities = activities.map(extractData);
+           
             return activities;
         });
+        
+        feed = feed.map(cleanData);
         
         console.log(feed);
 
