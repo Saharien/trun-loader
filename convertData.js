@@ -7,7 +7,7 @@ class convertData {
         activity.name       = activity.name.replace("\n", "");
         activity.distance   = activity.distance.replace(',', '.');
         activity.distance   = parseFloat(activity.distance);
-        activity.timestampS = Date.parse(activity.timestamp);
+        activity.date       = new Date(activity.timestamp);
         
         // ToDo Daten säubern
         return activity;
