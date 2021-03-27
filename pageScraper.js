@@ -40,13 +40,14 @@ const scraperObject = {
 
         await page.waitForSelector('.branding-content');
 
-        for (let j = 0; j < 2; j++) {   // TODO unbedingt wieder auf 5 umbiegen!!!!!!
+        for (let j = 0; j < 5; j++) {   // TODO unbedingt wieder auf 5 umbiegen!!!!!!
 
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
         }
 
-        let feed = await page.$$eval('.feed-container .activity', activities => {
+        // Normale Einträge
+        let feed1 = await page.$$eval('.feed-container .activity', activities => {
 
             function extractData(el) {
 
@@ -70,20 +71,63 @@ const scraperObject = {
             return activities;
         });
 
+        // Verschachtelte Einträge (wenn mehrere Leute zusammen laufen)
+        let feed2 = await page.$$eval('.group-activity', activities => {
+
+            function extractData(el) {
+
+                var group = {
+                    'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
+                    'name': el.querySelectorAll('.entry-athlete'),
+                    'distance': el.querySelectorAll('li[title="Distanz"]')
+                };
+
+                let lines = new Array();
+
+                let index = 0;
+                for (index = 0; index < group.name.length; index++) {
+
+                    let distance = '0 km';
+                    try {
+                        if (group.distance[index] != null) distance = el.querySelector('li[title="Distanz"]').textContent;
+                    } catch (err) { }
+
+                    let line = {
+                        'url': group.name[index].href,
+                        'timestamp': group.timestamp,
+                        'name': group.name[index].textContent,
+                        'distance': distance
+                    };
+
+                    lines.push(line);
+
+                };
+
+                return lines;
+            }
+
+            activities = activities.flatMap(extractData);
+
+            return activities;
+        });
+
+        var feed = feed1.concat(feed2);
+
         feed = feed.map(convertData.convertData);
 
-        mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
+        // mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
 
+        // feed.map(function (entry) {
+        //     upsertRun({
+        //         url: entry.url,
+        //         timestamp: entry.timestamp,
+        //         name: entry.name,
+        //         distance: entry.distance,
+        //         date: entry.date
+        //     });
+        // });
 
-        feed.map(function (entry) {
-            upsertRun({
-                url: entry.url,
-                timestamp: entry.timestamp,
-                name: entry.name,
-                distance: entry.distance,
-                date: entry.date
-            });
-        });
+        // ToDo: https://stackoverflow.com/questions/8813838/properly-close-mongooses-connection-once-youre-done (vll. mit await einbauen?)
 
         console.log(feed);
 
