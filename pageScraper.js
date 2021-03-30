@@ -2,28 +2,51 @@ const CREDENTIALS = require('./credentials');
 const convertData = require('./convertData');
 const mongoose = require('mongoose');
 
-// const Run = require('./models/runs');
+const Run = require('./models/runs');
+const Biking = require('./models/bikings');
 
-// function upsertRun(runObj) {
+function upsertRun(runObj) {
 
-//     const DB_URL = 'mongodb://localhost/trun';
+    const DB_URL = 'mongodb://localhost/trun';
 
-//     if (mongoose.connection.readyState == 0) {
-//         mongoose.connect(DB_URL);
-//     }
+    if (mongoose.connection.readyState == 0) {
+        mongoose.connect(DB_URL);
+    }
 
-//     // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
-//     // by default, you need to set it to false.
-//     mongoose.set('useFindAndModify', false);
+    // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
+    // by default, you need to set it to false.
+    mongoose.set('useFindAndModify', false);
 
-//     // if the run already exists, update the entry, don't insert
-//     const conditions = { url: runObj.url, timestamp: runObj.timestamp };
-//     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+    // if the run already exists, update the entry, don't insert
+    const conditions = { url: runObj.url, timestamp: runObj.timestamp };
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-//     Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
-//         if (err) throw err;
-//     });
-// }
+    Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
+        if (err) throw err;
+    });
+}
+
+
+function upsertBiking(bikingObj) {
+
+    const DB_URL = 'mongodb://localhost/trun';
+
+    if (mongoose.connection.readyState == 0) {
+        mongoose.connect(DB_URL);
+    }
+
+    // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
+    // by default, you need to set it to false.
+    mongoose.set('useFindAndModify', false);
+
+    // if the run already exists, update the entry, don't insert
+    const conditions = { url: bikingObj.url, timestamp: bikingObj.timestamp };
+    const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+    Biking.findOneAndUpdate(conditions, bikingObj, options, (err, result) => {
+        if (err) throw err;
+    });
+}
 
 const scraperObject = {
 
@@ -124,17 +147,17 @@ const scraperObject = {
 
         console.log(feed);
 
-        // mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
+        mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
 
-        // feed.map(function (entry) {
-        //     upsertRun({
-        //         url: entry.url,
-        //         timestamp: entry.timestamp,
-        //         name: entry.name,
-        //         distance: entry.distance,
-        //         date: entry.date
-        //     });
-        // });
+        feed.map(function (entry) {
+            upsertRun({
+                url: entry.url,
+                timestamp: entry.timestamp,
+                name: entry.name,
+                distance: entry.distance,
+                date: entry.date
+            });
+        });
 
         // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
         // und dann db closen
@@ -146,7 +169,6 @@ const scraperObject = {
         // mongoose.connection.close(false, () => {
         //     console.log('MongoDb connection closed.');
         // });
-
 
     },
 
@@ -173,11 +195,17 @@ const scraperObject = {
                     if (el.querySelector('li[title="Distanz"]') != null) distance = el.querySelector('li[title="Distanz"]').textContent;
                 } catch (err) { }
 
+                var type = 'ride';
+                try {
+                    if (el.querySelector('.icon-ebikeride') != null) type = 'ebikeride';
+                } catch (err) { }
+
                 var line = {
                     'url': el.querySelector('a').href,
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelector('.entry-athlete').textContent,
-                    'distance': distance
+                    'distance': distance,
+                    'type': type
                 };
 
                 return line;
@@ -209,11 +237,17 @@ const scraperObject = {
                         if (group.distance[index] != null) distance = el.querySelector('li[title="Distanz"]').textContent;
                     } catch (err) { }
 
+                    let type = 'ride';
+                    try {
+                        if (el.querySelector('.icon-ebikeride') != null) type = 'ebikeride';
+                    } catch (err) { }
+
                     let line = {
                         'url': group.name[index].href,
                         'timestamp': group.timestamp,
                         'name': group.name[index].textContent,
-                        'distance': distance
+                        'distance': distance,
+                        'type': type
                     };
 
                     lines.push(line);
@@ -236,15 +270,16 @@ const scraperObject = {
 
         // mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
 
-        // feed.map(function (entry) {
-        //     upsertRun({
-        //         url: entry.url,
-        //         timestamp: entry.timestamp,
-        //         name: entry.name,
-        //         distance: entry.distance,
-        //         date: entry.date
-        //     });
-        // });
+        feed.map(function (entry) {
+            upsertBiking({
+                url: entry.url,
+                timestamp: entry.timestamp,
+                name: entry.name,
+                distance: entry.distance,
+                type: entry.type,
+                date: entry.date
+            });
+        });
 
         // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
         // und dann db closen
@@ -259,7 +294,5 @@ const scraperObject = {
 
 
     }
-
-
 }
 module.exports = scraperObject;
