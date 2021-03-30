@@ -11,6 +11,10 @@ function upsertRun(runObj) {
         mongoose.connect(DB_URL);
     }
 
+    // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
+    // by default, you need to set it to false.
+    mongoose.set('useFindAndModify', false);
+
     // if the run already exists, update the entry, don't insert
     const conditions = { url: runObj.url, timestamp: runObj.timestamp };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
@@ -115,21 +119,31 @@ const scraperObject = {
 
         feed = feed.map(convertData.convertData);
 
-        // mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
+        console.log(feed);
 
-        // feed.map(function (entry) {
-        //     upsertRun({
-        //         url: entry.url,
-        //         timestamp: entry.timestamp,
-        //         name: entry.name,
-        //         distance: entry.distance,
-        //         date: entry.date
-        //     });
-        // });
+        mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
+
+        feed.map(function (entry) {
+            upsertRun({
+                url: entry.url,
+                timestamp: entry.timestamp,
+                name: entry.name,
+                distance: entry.distance,
+                date: entry.date
+            });
+        });
+
+        // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
+        // und dann db closen
 
         // ToDo: https://stackoverflow.com/questions/8813838/properly-close-mongooses-connection-once-youre-done (vll. mit await einbauen?)
 
-        console.log(feed);
+        //mongoose.disconnect();
+        //mongoose.connection.close();
+        // mongoose.connection.close(false, () => {
+        //     console.log('MongoDb connection closed.');
+        // });
+
 
     }
 }
