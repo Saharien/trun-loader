@@ -84,6 +84,7 @@ const scraperObject = {
                 var distance = '0 km';
                 try {
                     if (el.querySelector('li[title="Distanz"]') != null) distance = el.querySelector('li[title="Distanz"]').textContent;
+                    if (el.querySelector('li[title="Distance"]') != null) distance = el.querySelector('li[title="Distance"]').textContent;
                 } catch (err) { }
 
                 var line = {
@@ -109,7 +110,8 @@ const scraperObject = {
                 var group = {
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelectorAll('.entry-athlete'),
-                    'distance': el.querySelectorAll('li[title="Distanz"]')
+                    'distance': el.querySelectorAll('li[title="Distance"]'),
+                    'distanz': el.querySelectorAll('li[title="Distanz"]')
                 };
 
                 let lines = new Array();
@@ -119,7 +121,8 @@ const scraperObject = {
 
                     let distance = '0 km';
                     try {
-                        if (group.distance[index] != null) distance = el.querySelector('li[title="Distanz"]').textContent;
+                        if (group.distance[index] != null) distance = el.querySelector('li[title="Distance"]').textContent;
+                        if (group.distanz[index] != null) distance = el.querySelector('li[title="Distanz"]').textContent;
                     } catch (err) { }
 
                     let line = {
@@ -193,6 +196,13 @@ const scraperObject = {
                 var distance = '0 km';
                 try {
                     if (el.querySelector('li[title="Distanz"]') != null) distance = el.querySelector('li[title="Distanz"]').textContent;
+                    if (el.querySelector('li[title="Distance"]') != null) distance = el.querySelector('li[title="Distance"]').textContent;
+                } catch (err) { }
+                
+                var elevgain = '0 m';
+                try {
+                    if (el.querySelector('li[title="Höhenmeter"]') != null) elevgain = el.querySelector('li[title="Höhenmeter"]').textContent;
+                    if (el.querySelector('li[title="Elev Gain"]') != null) elevgain = el.querySelector('li[title="Elev Gain"]').textContent;
                 } catch (err) { }
 
                 var type = 'ride';
@@ -205,6 +215,7 @@ const scraperObject = {
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelector('.entry-athlete').textContent,
                     'distance': distance,
+                    'elevgain': elevgain,
                     'type': type
                 };
 
@@ -224,7 +235,10 @@ const scraperObject = {
                 var group = {
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelectorAll('.entry-athlete'),
-                    'distance': el.querySelectorAll('li[title="Distanz"]')
+                    'distanz': el.querySelectorAll('li[title="Distanz"]'),
+                    'distance': el.querySelectorAll('li[title="Distance"]'),
+                    'hoehenmeter' : el.querySelectorAll('li[title="Höhenmeter"]'),
+                    'elevgain' : el.querySelectorAll('li[title="Elev Gain"]'),
                 };
 
                 let lines = new Array();
@@ -234,7 +248,14 @@ const scraperObject = {
 
                     let distance = '0 km';
                     try {
-                        if (group.distance[index] != null) distance = el.querySelector('li[title="Distanz"]').textContent;
+                        if (group.distanz[index] != null) distance = el.querySelector('li[title="Distanz"]').textContent;
+                        if (group.distance[index] != null) distance = el.querySelector('li[title="Distance"]').textContent;
+                    } catch (err) { }
+
+                    let elevgain = '0 m';
+                    try {
+                        if (group.hoehenmeter[index] != null) elevgain = el.querySelector('li[title="Höhenmeter"]').textContent;
+                        if (group.elevgain[index] != null) elevgain = el.querySelector('li[title="Elev Gain"]').textContent;
                     } catch (err) { }
 
                     let type = 'ride';
@@ -247,6 +268,7 @@ const scraperObject = {
                         'timestamp': group.timestamp,
                         'name': group.name[index].textContent,
                         'distance': distance,
+                        'elevgain': elevgain,
                         'type': type
                     };
 
@@ -276,6 +298,7 @@ const scraperObject = {
                 timestamp: entry.timestamp,
                 name: entry.name,
                 distance: entry.distance,
+                elevgain: entry.elevgain,
                 type: entry.type,
                 date: entry.date
             });

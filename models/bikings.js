@@ -5,6 +5,7 @@ let bikingsSchema = new mongoose.Schema({
     timestamp: String,
     name: String,
     distance: Number,
+    elevgain: Number,
     type: String,
     date: Date
 });
