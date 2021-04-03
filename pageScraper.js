@@ -7,10 +7,8 @@ const Biking = require('./models/bikings');
 
 function upsertRun(runObj) {
 
-    const DB_URL = 'mongodb://localhost/trun';
-
     if (mongoose.connection.readyState == 0) {
-        mongoose.connect(DB_URL);
+        mongoose.connect(CREDENTIALS.DB_URL);
     }
 
     // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
@@ -29,10 +27,8 @@ function upsertRun(runObj) {
 
 function upsertBiking(bikingObj) {
 
-    const DB_URL = 'mongodb://localhost/trun';
-
     if (mongoose.connection.readyState == 0) {
-        mongoose.connect(DB_URL);
+        mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
     }
 
     // Make Mongoose use `findOneAndUpdate()`. Note that this option is `true`
@@ -150,7 +146,7 @@ const scraperObject = {
 
         console.log(feed);
 
-        mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
+        mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
 
         feed.map(function (entry) {
             upsertRun({
@@ -290,7 +286,7 @@ const scraperObject = {
 
         console.log(feed);
 
-        // mongoose.connect('mongodb://localhost/trun', { useNewUrlParser: true, useUnifiedTopology: true });
+        mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
 
         feed.map(function (entry) {
             upsertBiking({
