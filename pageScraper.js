@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const Run = require('./models/runs');
 const Biking = require('./models/bikings');
 
-function upsertRun(runObj) {
+async function upsertRun(runObj) {
 
     if (mongoose.connection.readyState == 0) {
         mongoose.connect(CREDENTIALS.DB_URL);
@@ -19,13 +19,13 @@ function upsertRun(runObj) {
     const conditions = { url: runObj.url, timestamp: runObj.timestamp };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-    Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
+    await Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
         if (err) throw err;
     });
 }
 
 
-function upsertBiking(bikingObj) {
+async function upsertBiking(bikingObj) {
 
     if (mongoose.connection.readyState == 0) {
         mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
@@ -39,7 +39,7 @@ function upsertBiking(bikingObj) {
     const conditions = { url: bikingObj.url, timestamp: bikingObj.timestamp };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-    Biking.findOneAndUpdate(conditions, bikingObj, options, (err, result) => {
+    await Biking.findOneAndUpdate(conditions, bikingObj, options, (err, result) => {
         if (err) throw err;
     });
 }
@@ -66,7 +66,7 @@ const scraperObject = {
 
         await page.waitForSelector('.branding-content');
 
-        for (let j = 0; j < 5; j++) {   // TODO unbedingt wieder auf 5 umbiegen!!!!!!
+        for (let j = 0; j < 2; j++) { // ToDo wieder auf 5 umbiegen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
@@ -140,23 +140,25 @@ const scraperObject = {
             return activities;
         });
 
-        var feed = feed1.concat(feed2);
+        var feed = await feed1.concat(feed2);
 
-        feed = feed.map(convertData.convertData);
+        feed = await feed.map(convertData.convertData);
 
         console.log(feed);
 
-        mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
+        await mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
 
-        feed.map(function (entry) {
-            upsertRun({
+        for (let entry of feed) {
+            await upsertRun({
                 url: entry.url,
                 timestamp: entry.timestamp,
                 name: entry.name,
                 distance: entry.distance,
                 date: entry.date
             });
-        });
+         }
+              
+        await mongoose.connection.close();
 
         // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
         // und dann db closen
@@ -280,16 +282,16 @@ const scraperObject = {
             return activities;
         });
 
-        var feed = feed1.concat(feed2);
+        var feed = await feed1.concat(feed2);
 
-        feed = feed.map(convertData.convertData);
+        feed = await feed.map(convertData.convertData);
 
         console.log(feed);
 
-        mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
+        await mongoose.connect(CREDENTIALS.dburl, { useNewUrlParser: true, useUnifiedTopology: true, user: CREDENTIALS.dbuser, pass: CREDENTIALS.dbpass, authSource: 'admin' });
 
-        feed.map(function (entry) {
-            upsertBiking({
+        for (let entry of feed) {
+            await upsertBiking({
                 url: entry.url,
                 timestamp: entry.timestamp,
                 name: entry.name,
@@ -298,7 +300,9 @@ const scraperObject = {
                 type: entry.type,
                 date: entry.date
             });
-        });
+        }
+
+        await mongoose.connection.close();
 
         // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
         // und dann db closen
@@ -310,7 +314,6 @@ const scraperObject = {
         // mongoose.connection.close(false, () => {
         //     console.log('MongoDb connection closed.');
         // });
-
 
     }
 }
