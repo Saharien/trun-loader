@@ -66,7 +66,7 @@ const scraperObject = {
 
         await page.waitForSelector('.branding-content');
 
-        for (let j = 0; j < 2; j++) { // ToDo wieder auf 5 umbiegen!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        for (let j = 0; j < 5; j++) {
 
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
@@ -156,20 +156,11 @@ const scraperObject = {
                 distance: entry.distance,
                 date: entry.date
             });
-         }
-              
-        await mongoose.connection.close();
+        }
 
-        // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
-        // und dann db closen
-
-        // ToDo: https://stackoverflow.com/questions/8813838/properly-close-mongooses-connection-once-youre-done (vll. mit await einbauen?)
-
-        //mongoose.disconnect();
-        //mongoose.connection.close();
-        // mongoose.connection.close(false, () => {
-        //     console.log('MongoDb connection closed.');
-        // });
+        mongoose.connection.close(false, () => {
+            console.log('MongoDb connection closed (' + new Date() + ')');
+        });
 
     },
 
@@ -180,7 +171,7 @@ const scraperObject = {
 
         await page.waitForSelector('.branding-content');
 
-        for (let j = 0; j < 5; j++) {   // TODO unbedingt wieder auf 5 umbiegen!!!!!!
+        for (let j = 0; j < 5; j++) {
 
             await page.evaluate('window.scrollTo(0, document.body.scrollHeight)');
             await page.waitForTimeout(3000);
@@ -196,7 +187,7 @@ const scraperObject = {
                     if (el.querySelector('li[title="Distanz"]') != null) distance = el.querySelector('li[title="Distanz"]').textContent;
                     if (el.querySelector('li[title="Distance"]') != null) distance = el.querySelector('li[title="Distance"]').textContent;
                 } catch (err) { }
-                
+
                 var elevgain = '0 m';
                 try {
                     if (el.querySelector('li[title="Höhenmeter"]') != null) elevgain = el.querySelector('li[title="Höhenmeter"]').textContent;
@@ -235,8 +226,8 @@ const scraperObject = {
                     'name': el.querySelectorAll('.entry-athlete'),
                     'distanz': el.querySelectorAll('li[title="Distanz"]'),
                     'distance': el.querySelectorAll('li[title="Distance"]'),
-                    'hoehenmeter' : el.querySelectorAll('li[title="Höhenmeter"]'),
-                    'elevgain' : el.querySelectorAll('li[title="Elev Gain"]'),
+                    'hoehenmeter': el.querySelectorAll('li[title="Höhenmeter"]'),
+                    'elevgain': el.querySelectorAll('li[title="Elev Gain"]'),
                 };
 
                 let lines = new Array();
@@ -302,18 +293,9 @@ const scraperObject = {
             });
         }
 
-        await mongoose.connection.close();
-
-        // Idee zum sauberen Exiten: FOR Schleife über die Läufe, da sauberen findOneAndUpdate über die Läufe mit await (bin eh in einer async fct)
-        // und dann db closen
-
-        // ToDo: https://stackoverflow.com/questions/8813838/properly-close-mongooses-connection-once-youre-done (vll. mit await einbauen?)
-
-        //mongoose.disconnect();
-        //mongoose.connection.close();
-        // mongoose.connection.close(false, () => {
-        //     console.log('MongoDb connection closed.');
-        // });
+        mongoose.connection.close(false, () => {
+            console.log('MongoDb connection closed (' + new Date() + ')');
+        });
 
     }
 }

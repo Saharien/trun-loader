@@ -5,6 +5,7 @@ async function scrapeAll(browserInstance) {
     let browser;
     try {
         browser = await browserInstance;
+        console.log('Start scraping (' + new Date() + ')');
         await pageScraper.scraper(browser);
         await pageScraper.scrapeTBike(browser);
     }
