@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 let runsSchema = new mongoose.Schema({
+    activity: String,
     url: String,
     timestamp: String,
     name: String,
