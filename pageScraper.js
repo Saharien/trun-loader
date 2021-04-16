@@ -19,9 +19,26 @@ async function upsertRun(runObj) {
     const conditions = { url: runObj.url, timestamp: runObj.timestamp };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-    await Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
-        if (err) throw err;
-    });
+
+    try {
+        await Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
+            if (err) {
+                if (err.code === 11000) {
+                    console.log('Retry because of duplicate key (https://stackoverflow.com/questions/37295648/mongoose-duplicate-key-error-with-upsert)');
+                    // Run.findOneAndUpdate(conditions, runObj, options, (err, result) => {
+                    //     if (err) throw err;
+                    // });
+                } else {
+                    throw err;
+                }
+            }
+        });
+    } catch (e) {
+        // Zu prüfen: fangen wir hier auch errors != 11000?
+        console.log('Duplicate Key Catch');
+        console.log(e);
+    }
+
 }
 
 
@@ -39,9 +56,26 @@ async function upsertBiking(bikingObj) {
     const conditions = { url: bikingObj.url, timestamp: bikingObj.timestamp };
     const options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
-    await Biking.findOneAndUpdate(conditions, bikingObj, options, (err, result) => {
-        if (err) throw err;
-    });
+
+    try {
+        await Biking.findOneAndUpdate(conditions, bikingObj, options, (err, result) => {
+            if (err) {
+                if (err.code === 11000) {
+                    console.log('Retry because of duplicate key (https://stackoverflow.com/questions/37295648/mongoose-duplicate-key-error-with-upsert)');
+                    // await Biking.findOneAndUpdate(conditions, bikingObj, options, (err, result) => {
+                    //     if (err) throw err;
+                    // });
+                } else {
+                    throw err;
+                }
+            }
+        });
+    } catch (e) {
+        // Zu prüfen: fangen wir hier auch errors != 11000?
+        console.log('Duplicate Key Catch');
+        console.log(e);
+    }
+
 }
 
 const scraperObject = {
@@ -84,6 +118,7 @@ const scraperObject = {
                 } catch (err) { }
 
                 var line = {
+                    'activity': el.getAttribute("id"),
                     'url': el.querySelector('a').href,
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelector('.entry-athlete').textContent,
@@ -104,6 +139,7 @@ const scraperObject = {
             function extractData(el) {
 
                 var group = {
+                    'activity': el.querySelectorAll('.feed-entry'),
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelectorAll('.entry-athlete'),
                     'distance': el.querySelectorAll('li[title="Distance"]'),
@@ -122,6 +158,7 @@ const scraperObject = {
                     } catch (err) { }
 
                     let line = {
+                        'activity': group.activity[index].getAttribute("id"),
                         'url': group.name[index].href,
                         'timestamp': group.timestamp,
                         'name': group.name[index].textContent,
@@ -150,6 +187,7 @@ const scraperObject = {
 
         for (let entry of feed) {
             await upsertRun({
+                activity: entry.activity,
                 url: entry.url,
                 timestamp: entry.timestamp,
                 name: entry.name,
@@ -200,6 +238,7 @@ const scraperObject = {
                 } catch (err) { }
 
                 var line = {
+                    'activity': el.getAttribute("id"),
                     'url': el.querySelector('a').href,
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelector('.entry-athlete').textContent,
@@ -222,6 +261,7 @@ const scraperObject = {
             function extractData(el) {
 
                 var group = {
+                    'activity': el.querySelectorAll('.feed-entry'),
                     'timestamp': el.querySelector('.timestamp').getAttribute("datetime"),
                     'name': el.querySelectorAll('.entry-athlete'),
                     'distanz': el.querySelectorAll('li[title="Distanz"]'),
@@ -253,6 +293,7 @@ const scraperObject = {
                     } catch (err) { }
 
                     let line = {
+                        'activity': group.activity[index].getAttribute("id"),
                         'url': group.name[index].href,
                         'timestamp': group.timestamp,
                         'name': group.name[index].textContent,
@@ -283,6 +324,7 @@ const scraperObject = {
 
         for (let entry of feed) {
             await upsertBiking({
+                activity: entry.activity,
                 url: entry.url,
                 timestamp: entry.timestamp,
                 name: entry.name,
